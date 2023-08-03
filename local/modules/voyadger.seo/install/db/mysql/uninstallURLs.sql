@@ -1,0 +1,1 @@
+drop table if exists voyadger_seo_urls;

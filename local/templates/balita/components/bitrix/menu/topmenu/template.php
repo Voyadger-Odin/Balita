@@ -29,6 +29,9 @@ foreach($arResult as $arItem):?>
             </li>
             <?endif;?>
         <?else:?>
+        <?
+            //var_dump($arItem);
+            ?>
             <a class="dropdown-item" href="<?=$arItem["LINK"]?>"><?=$arItem["TEXT"]?></a>
         <?endif?>
 
