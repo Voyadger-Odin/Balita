@@ -2,12 +2,11 @@
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("contact");
 ?>
-
     <section class="site-section">
         <div class="container">
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <h1>Contact</h1>
+                    <h1><?$APPLICATION->ShowProperty("h1")?></h1>
                 </div>
             </div>
             <div class="row blog-entries">

@@ -5,29 +5,31 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
     die();
 }
 
-use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\Loader;
-use Bitrix\Main\Application;
-use Bitrix\Main\Entity\Base;
+
+use \Bitrix\Main\Localization\Loc;
+use \Bitrix\Main\Loader;
+use \Bitrix\Main\Application;
+use \Bitrix\Main\Entity\Base;
+use \Bitrix\Main\EventManager;
 
 Loc::loadMessages(__FILE__);
 Class voyadger_seo extends CModule
 {
-    public $MODULE_ID = 'voyadger.seo'; // NOTE using "var" for bitrix rules
+    var $MODULE_ID = 'voyadger.seo'; // NOTE using "var" for bitrix rules
 
-    public $MODULE_VERSION;
+    var $MODULE_VERSION;
 
-    public $MODULE_VERSION_DATE;
+    var $MODULE_VERSION_DATE;
 
-    public $MODULE_NAME;
+    var $MODULE_NAME;
 
-    public $MODULE_DESCRIPTION;
+    var $MODULE_DESCRIPTION;
 
-    public $MODULE_GROUP_RIGHTS;
+    var $MODULE_GROUP_RIGHTS;
 
-    public $PARTNER_NAME;
+    var $PARTNER_NAME;
 
-    public $PARTNER_URI;
+    var $PARTNER_URI;
 
     public function __construct()
     {
@@ -61,58 +63,67 @@ Class voyadger_seo extends CModule
     }
 
     // DB
-
-    protected function getDB(){
-        return array('voyadger_seo_urls'=>'URLs');
-    }
-
     public function InstallDB()
     {
-
         Loader::includeModule($this->MODULE_ID);
-        if (!Application::getConnection(\Voyadger\Seo\urls::getConnectionName())->isTableExist(
-            Base::getInstance('\Voyadger\Seo\urls')->getDBTableName()
+
+        // URLS
+        if (!Application::getConnection(\Voyadger\Seo\UrlsTable::getConnectionName())->isTableExists(
+            Base::getInstance('\Voyadger\Seo\UrlsTable')->getDBTableName()
         )){
-            Base::getInstance('\Voyadger\Seo\urls')->createDBTableName();
+            Base::getInstance('\Voyadger\Seo\UrlsTable')->createDbTable();
         }
 
-        /*
-        global $DB, $DBType, $APPLICATION;
-        $this->errors = false;
-
-        $arDB = $this->getDB();
-
-        foreach($arDB as $name => $path) {
-            if (!$DB->Query("SELECT 'x' FROM " . $name, true)) {
-                $this->errors = $DB->RunSQLBatch($this->getPath() . "/install/db/mysql/install" . $path . ".sql");
-                if ($this->errors) {
-                    $APPLICATION->ThrowException(implode("", $this->errors));
-                    return false;
-                }
-            }
+        // REDIRECTS
+        if (!Application::getConnection(\Voyadger\Seo\RedirectsTable::getConnectionName())->isTableExists(
+            Base::getInstance('\Voyadger\Seo\RedirectsTable')->getDBTableName()
+        )){
+            Base::getInstance('\Voyadger\Seo\RedirectsTable')->createDbTable();
         }
-
-        return true;
-        */
     }
 
-    function UnInstallDB($preserveOrders = false){
-        global $DB, $DBType, $APPLICATION;
-        $this->errors = false;
+    function UnInstallDB()
+    {
+        Loader::includeModule($this->MODULE_ID);
 
-        $arDB = $this->getDB();
+        // URLS
+        Application::getConnection(\Voyadger\Seo\UrlsTable::getConnectionName())->
+            queryExecute(
+                'drop table if exists ' . Base::getInstance('\Voyadger\Seo\UrlsTable')->getDBTableName()
+        );
 
-        foreach($arDB as $name => $path){
-            if($name != 'voyadger_seo_urls' || !$preserveOrders){
-                $this->errors = $DB->RunSQLBatch($this->getPath() . "/install/db/mysql/uninstall".$path.".sql");
-                if(!empty($this->errors)){
-                    $APPLICATION->ThrowException(implode("", $this->errors));
-                    return false;
-                }
-            }
-        }
+        // REDIRECTS
+        Application::getConnection(\Voyadger\Seo\RedirectsTable::getConnectionName())->
+        queryExecute(
+            'drop table if exists ' . Base::getInstance('\Voyadger\Seo\RedirectsTable')->getDBTableName()
+        );
+    }
 
-        return true;
+    // Events
+    public function InstallEvents()
+    {
+        EventManager::getInstance()->registerEventHandler(
+            'main',
+            'OnPageStart',
+            $this->MODULE_ID,
+            '\Voyadger\Seo\Event',
+            'eventHandlerTagsOverwrite'
+        );
+
+        RegisterModuleDependences('main', 'OnProlog', $this->MODULE_ID, '\Voyadger\Seo\Event', 'eventhandlerRedirect');
+    }
+
+    public function UnInstallEvents()
+    {
+        EventManager::getInstance()->unRegisterEventHandler(
+            'main',
+            'OnPageStart',
+            $this->MODULE_ID,
+            '\Voyadger\Seo\Event',
+            'eventHandlerTagsOverwrite'
+        );
+
+        UnRegisterModuleDependences('main', 'OnProlog', $this->MODULE_ID, '\Voyadger\Seo\Event', 'eventhandlerRedirect');
     }
 
     public function DoInstall()
@@ -131,16 +142,13 @@ Class voyadger_seo extends CModule
             return false;
         }
 
-        $not_errors = true;
-
-        $not_errors = $this->InstallDB();
-
-        if (!$not_errors){
-            return $not_errors;
-        }
-
         RegisterModule($this->MODULE_ID);
         RegisterModuleDependences('main', 'OnPageStart', $this->MODULE_ID);
+
+        $cresult = CopyDirFiles($this->GetPath() . "/install/admin", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/admin", true, true);
+
+        $this->InstallDB();
+        $this->InstallEvents();
 
         $APPLICATION->IncludeAdminFile(GetMessage("VOYADGER_SEO_INSTALL"), $this->getPath() . '/install/step1.php');
     }
@@ -159,6 +167,10 @@ Class voyadger_seo extends CModule
             if ($_REQUEST['savedata'] != 'Y'){
                 $this->UninstallDB();
             }
+
+            $this->UnInstallEvents();
+
+            DeleteDirFiles($this->GetPath() . "/install/admin", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/admin");
 
             UnRegisterModuleDependences('main', 'OnPageStart', $this->MODULE_ID);
             UnRegisterModule($this->MODULE_ID);
