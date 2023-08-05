@@ -330,9 +330,9 @@ $APPLICATION->SetTitle("Colorlib Balita &mdash; Minimal Blog Template");
 	</div>
 	<div class="row blog-entries">
 		 <?$APPLICATION->IncludeComponent(
-	"custom:posts.list",
-	".default",
-	Array(
+	"custom:posts.list", 
+	".default", 
+	array(
 		"ACTIVE_DATE_FORMAT" => "f j, Y",
 		"ADD_SECTIONS_CHAIN" => "Y",
 		"AJAX_MODE" => "N",
@@ -346,14 +346,24 @@ $APPLICATION->SetTitle("Colorlib Balita &mdash; Minimal Blog Template");
 		"CACHE_TYPE" => "A",
 		"CHECK_DATES" => "Y",
 		"COMPONENT_TEMPLATE" => ".default",
-		"DETAIL_URL" => "",
+		"DETAIL_URL" => "#SITE_DIR#/post/#CODE#",
 		"DISPLAY_BOTTOM_PAGER" => "Y",
 		"DISPLAY_DATE" => "Y",
 		"DISPLAY_NAME" => "Y",
 		"DISPLAY_PICTURE" => "Y",
 		"DISPLAY_PREVIEW_TEXT" => "Y",
 		"DISPLAY_TOP_PAGER" => "Y",
-		"FIELD_CODE" => array(0=>"PREVIEW_TEXT",1=>"PREVIEW_PICTURE",2=>"IBLOCK_TYPE_ID",3=>"IBLOCK_ID",4=>"IBLOCK_CODE",5=>"IBLOCK_NAME",6=>"IBLOCK_EXTERNAL_ID",7=>"DATE_CREATE",8=>"",),
+		"FIELD_CODE" => array(
+			0 => "PREVIEW_TEXT",
+			1 => "PREVIEW_PICTURE",
+			2 => "IBLOCK_TYPE_ID",
+			3 => "IBLOCK_ID",
+			4 => "IBLOCK_CODE",
+			5 => "IBLOCK_NAME",
+			6 => "IBLOCK_EXTERNAL_ID",
+			7 => "DATE_CREATE",
+			8 => "",
+		),
 		"FILTER_NAME" => "",
 		"HIDE_LINK_WHEN_NO_DETAIL" => "N",
 		"IBLOCK_ID" => "6",
@@ -372,7 +382,10 @@ $APPLICATION->SetTitle("Colorlib Balita &mdash; Minimal Blog Template");
 		"PARENT_SECTION" => "",
 		"PARENT_SECTION_CODE" => "travel",
 		"PREVIEW_TRUNCATE_LEN" => "",
-		"PROPERTY_CODE" => array(0=>"",1=>"",),
+		"PROPERTY_CODE" => array(
+			0 => "",
+			1 => "",
+		),
 		"SET_BROWSER_TITLE" => "Y",
 		"SET_LAST_MODIFIED" => "N",
 		"SET_META_DESCRIPTION" => "Y",
@@ -385,7 +398,8 @@ $APPLICATION->SetTitle("Colorlib Balita &mdash; Minimal Blog Template");
 		"SORT_ORDER1" => "DESC",
 		"SORT_ORDER2" => "ASC",
 		"STRICT_SECTION_CHECK" => "N"
-	)
+	),
+	false
 );?> <!-- END main-content -->
 
 <? endif; ?>

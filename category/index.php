@@ -31,7 +31,7 @@ $APPLICATION->SetTitle("category");
 		"CACHE_TYPE" => "N",
 		"CHECK_DATES" => "Y",
 		"COMPONENT_TEMPLATE" => "postslistvertical",
-		"DETAIL_URL" => "",
+		"DETAIL_URL" => "#SITE_DIR#/post/#CODE#",
 		"DISPLAY_BOTTOM_PAGER" => "Y",
 		"DISPLAY_DATE" => "Y",
 		"DISPLAY_NAME" => "Y",
